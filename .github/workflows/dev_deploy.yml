@@ -60,7 +60,7 @@ jobs:
           TOMCAT_URL: ${{ secrets.TOMCAT_URL }}
           TOMCAT_USER: ${{ secrets.TOMCAT_USER }}
           TOMCAT_PASSWORD: ${{ secrets.TOMCAT_PASSWORD }}
-          CONTEXT_PATH: ${{ github.event.inputs.context_path || secrets.CONTEXT_PATH || '/bwp-latest' }}
+          CONTEXT_PATH: ${{ '/bwp-dev' }}
         run: |
           set -e
           WAR_FILE="dist/bwp-latest.war"
