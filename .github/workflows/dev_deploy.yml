@@ -45,9 +45,6 @@ jobs:
     name: Deploy to Tomcat
     needs: build
     runs-on: ubuntu-latest
-    if: |
-      github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'push' && github.ref == 'refs/heads/main')
     steps:
       - name: Download WAR artifact
         uses: actions/download-artifact@v4
