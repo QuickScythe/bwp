@@ -1,5 +1,6 @@
-package com.bwp;
+package com.bwp.components;
 
+import com.bwp.Main;
 import com.bwp.utils.Utils;
 import com.bwp.utils.queue.QueueManager;
 import com.quiptmc.core.utils.TaskScheduler;
