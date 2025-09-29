@@ -9,7 +9,7 @@ on:
       context_path:
         description: "Tomcat context path (e.g., /bwp-latest)"
         required: false
-        default: "/bwp-latest"
+        default: "/bwp-dev"
 
 jobs:
   build:
