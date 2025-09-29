@@ -1,9 +1,9 @@
-name: Build and Deploy WAR to Tomcat
+name: Build and Deploy WAR to Tomcat (DEV)
 
 on:
   push:
     branches:
-      - master
+      - development
   workflow_dispatch:
     inputs:
       context_path:
