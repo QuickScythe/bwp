@@ -10,6 +10,10 @@ on:
         description: "Tomcat context path (e.g., /bwp-latest)"
         required: false
         default: "/bwp-latest"
+      use_ssh:
+        description: "Set to 'true' to deploy via SSH from the server (bypasses IP restrictions)"
+        required: false
+        default: "false"
 
 jobs:
   build:
@@ -63,13 +67,13 @@ jobs:
         run: ls -la dist
 
       - name: Setup SSH agent (only if DEPLOY_VIA_SSH=true)
-        if: env.DEPLOY_VIA_SSH == 'true'
+        if: github.event.inputs.use_ssh == 'true'
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: Add server to known_hosts (only if DEPLOY_VIA_SSH=true)
-        if: env.DEPLOY_VIA_SSH == 'true'
+        if: github.event.inputs.use_ssh == 'true'
         run: |
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
