@@ -62,7 +62,7 @@ jobs:
           TOMCAT_URL: ${{ secrets.TOMCAT_URL }}
           TOMCAT_USER: ${{ secrets.TOMCAT_USER }}
           TOMCAT_PASSWORD: ${{ secrets.TOMCAT_PASSWORD }}
-          PACKAGES_PASSWORD: ${{ secrets.PACKAGES_PASSWORD }}
+          PACKAGES_TOKEN: ${{ secrets.PACKAGES_TOKEN }}
           CONTEXT_PATH: ${{ github.event.inputs.context_path || secrets.CONTEXT_PATH || '/bwp-latest' }}
         run: |
           set -e
