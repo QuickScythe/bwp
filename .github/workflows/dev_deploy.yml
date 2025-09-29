@@ -39,7 +39,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: bwp-war
-          path: build/libs/bwp-latest.war
+          path: build/libs/ROOT.war
 
   deploy:
     name: Deploy to Tomcat
@@ -63,7 +63,7 @@ jobs:
           CONTEXT_PATH: ${{ '/bwp-dev' }}
         run: |
           set -e
-          WAR_FILE="dist/bwp-latest.war"
+          WAR_FILE="dist/ROOT.war"
           if [ ! -f "$WAR_FILE" ]; then
             echo "WAR not found at $WAR_FILE" >&2
             exit 1
