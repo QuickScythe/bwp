@@ -48,6 +48,10 @@ jobs:
     if: |
       github.event_name == 'workflow_dispatch' ||
       (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    env:
+      # Toggle to use SSH-based deployment (bypasses Tomcat Manager IP restrictions via localhost)
+      DEPLOY_VIA_SSH: ${{ secrets.DEPLOY_VIA_SSH || 'false' }}
+      TOMCAT_PORT: ${{ secrets.TOMCAT_PORT || '8080' }}
     steps:
       - name: Download WAR artifact
         uses: actions/download-artifact@v4
@@ -58,22 +62,34 @@ jobs:
       - name: Show downloaded files
         run: ls -la dist
 
-      - name: Deploy via Tomcat Manager text API (update if exists)
+      - name: Setup SSH agent (only if DEPLOY_VIA_SSH=true)
+        if: env.DEPLOY_VIA_SSH == 'true'
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Add server to known_hosts (only if DEPLOY_VIA_SSH=true)
+        if: env.DEPLOY_VIA_SSH == 'true'
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          if [ -n "${{ secrets.SSH_HOST }}" ]; then
+            ssh-keyscan -H "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null || true
+          fi
+
+      - name: Deploy application
         env:
           TOMCAT_URL: ${{ secrets.TOMCAT_URL }}
           TOMCAT_USER: ${{ secrets.TOMCAT_USER }}
           TOMCAT_PASSWORD: ${{ secrets.TOMCAT_PASSWORD }}
           CONTEXT_PATH: ${{ github.event.inputs.context_path || secrets.CONTEXT_PATH || '/bwp-latest' }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
         run: |
           set -e
           WAR_FILE="dist/bwp-latest.war"
           if [ ! -f "$WAR_FILE" ]; then
             echo "WAR not found at $WAR_FILE" >&2
-            exit 1
-          fi
-
-          if [ -z "$TOMCAT_URL" ] || [ -z "$TOMCAT_USER" ] || [ -z "$TOMCAT_PASSWORD" ]; then
-            echo "Missing TOMCAT_URL/TOMCAT_USER/TOMCAT_PASSWORD secrets." >&2
             exit 1
           fi
 
@@ -86,33 +102,70 @@ jobs:
 
           echo "Using context path: $CONTEXT_PATH"
 
-          # Try undeploy first to ensure a clean state (ignore failures)
-          echo "Attempt undeploy (ignore errors)" || true
-          curl -fsS -u "$TOMCAT_USER:$TOMCAT_PASSWORD" \
-            "$TOMCAT_URL/manager/text/undeploy?path=$CONTEXT_PATH" || true
+          if [ "$DEPLOY_VIA_SSH" = "true" ]; then
+            # SSH-based deployment. Requires SSH_USER, SSH_HOST, SSH_PRIVATE_KEY secrets.
+            if [ -z "$SSH_USER" ] || [ -z "$SSH_HOST" ]; then
+              echo "DEPLOY_VIA_SSH is true, but SSH_USER/SSH_HOST not set." >&2
+              exit 1
+            fi
+            REMOTE="$SSH_USER@$SSH_HOST"
 
-          # Deploy new WAR
-          echo "Deploying new WAR to $TOMCAT_URL$CONTEXT_PATH"
-          curl -fsS -u "$TOMCAT_USER:$TOMCAT_PASSWORD" \
-            -T "$WAR_FILE" \
-            "$TOMCAT_URL/manager/text/deploy?path=$CONTEXT_PATH&update=true"
+            echo "Uploading WAR to $REMOTE:/tmp/bwp-latest.war"
+            scp -o StrictHostKeyChecking=no "$WAR_FILE" "$REMOTE:/tmp/bwp-latest.war"
 
-          echo "Deployment request sent. Checking app status..."
-          sleep 2
-          curl -fsS -u "$TOMCAT_USER:$TOMCAT_PASSWORD" "$TOMCAT_URL/manager/text/list" | sed -n "s/^.*$CONTEXT_PATH:.*$/&/p"
+            echo "Attempt undeploy on remote (ignore errors)"
+            ssh -o StrictHostKeyChecking=no "$REMOTE" \
+              "curl --fail-with-body -sS -u '$TOMCAT_USER:$TOMCAT_PASSWORD' 'http://localhost:${TOMCAT_PORT}/manager/text/undeploy?path=$CONTEXT_PATH' || true"
+
+            echo "Deploying WAR via remote Tomcat Manager (localhost:${TOMCAT_PORT})"
+            ssh -o StrictHostKeyChecking=no "$REMOTE" \
+              "curl --fail-with-body -sS -u '$TOMCAT_USER:$TOMCAT_PASSWORD' -T '/tmp/bwp-latest.war' 'http://localhost:${TOMCAT_PORT}/manager/text/deploy?path=$CONTEXT_PATH&update=true'"
+
+            echo "Cleaning up remote WAR"
+            ssh -o StrictHostKeyChecking=no "$REMOTE" "rm -f /tmp/bwp-latest.war || true"
+
+            echo "Fetching app status from remote"
+            ssh -o StrictHostKeyChecking=no "$REMOTE" \
+              "curl -sS -u '$TOMCAT_USER:$TOMCAT_PASSWORD' 'http://localhost:${TOMCAT_PORT}/manager/text/list' | sed -n \"s/^.*$CONTEXT_PATH:.*$/&/p\""
+          else
+            # Direct deployment via public TOMCAT_URL
+            if [ -z "$TOMCAT_URL" ] || [ -z "$TOMCAT_USER" ] || [ -z "$TOMCAT_PASSWORD" ]; then
+              echo "Missing TOMCAT_URL/TOMCAT_USER/TOMCAT_PASSWORD secrets." >&2
+              exit 1
+            fi
+
+            echo "Attempt undeploy (ignore errors)"
+            curl --fail-with-body -sS -u "$TOMCAT_USER:$TOMCAT_PASSWORD" \
+              "$TOMCAT_URL/manager/text/undeploy?path=$CONTEXT_PATH" || true
+
+            echo "Deploying new WAR to $TOMCAT_URL$CONTEXT_PATH"
+            curl --fail-with-body -sS -u "$TOMCAT_USER:$TOMCAT_PASSWORD" \
+              -T "$WAR_FILE" \
+              "$TOMCAT_URL/manager/text/deploy?path=$CONTEXT_PATH&update=true"
+
+            echo "Deployment request sent. Checking app status..."
+            sleep 2
+            curl --fail-with-body -sS -u "$TOMCAT_USER:$TOMCAT_PASSWORD" "$TOMCAT_URL/manager/text/list" | sed -n "s/^.*$CONTEXT_PATH:.*$/&/p"
+          fi
 
 #
 # Required GitHub Secrets (set in repo Settings > Secrets and variables > Actions):
-#   TOMCAT_URL       - Base URL of Tomcat, e.g., https://example.com:8443 or http://server:8080
-#   TOMCAT_USER      - Tomcat manager username (with manager-script role)
-#   TOMCAT_PASSWORD  - Tomcat manager password
+#   TOMCAT_URL          - Base URL of Tomcat, e.g., https://example.com:8443 or http://server:8080 (for direct mode)
+#   TOMCAT_USER         - Tomcat manager username (with manager-script role)
+#   TOMCAT_PASSWORD     - Tomcat manager password
 # Optional:
-#   CONTEXT_PATH     - Context path for the app (default: /bwp-latest)
+#   CONTEXT_PATH        - Context path for the app (default: /bwp-latest)
+#   DEPLOY_VIA_SSH      - 'true' to deploy via SSH from localhost on the server (bypasses IP restrictions). Default: 'false'
+#   SSH_HOST            - SSH host (required if DEPLOY_VIA_SSH=true)
+#   SSH_USER            - SSH username (required if DEPLOY_VIA_SSH=true)
+#   SSH_PRIVATE_KEY     - Private key for SSH (required if DEPLOY_VIA_SSH=true)
+#   TOMCAT_PORT         - Tomcat port on server for SSH mode (default: 8080)
 #
 # Notes:
 # - Ensure Tomcat's Manager App is installed and the user has the 'manager-script' role.
 # - In conf/tomcat-users.xml, define a user like:
 #     <role rolename="manager-script"/>
 #     <user username="deployer" password="REDACTED" roles="manager-script"/>
+# - If you see HTTP 403 in direct mode, your Tomcat Manager may restrict remote IPs. Set DEPLOY_VIA_SSH='true' and provide SSH_* secrets.
 # - The build.gradle already names the WAR 'bwp-latest.war' via bootWar.
 # - Logging is configured to write to ${catalina.base}/logs when present.
