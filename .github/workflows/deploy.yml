@@ -17,6 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GRADLE_OPTS: -Dorg.gradle.daemon=false
+      PACKAGES_TOKEN: ${{ secrets.PACKAGES_TOKEN }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -62,7 +63,6 @@ jobs:
           TOMCAT_URL: ${{ secrets.TOMCAT_URL }}
           TOMCAT_USER: ${{ secrets.TOMCAT_USER }}
           TOMCAT_PASSWORD: ${{ secrets.TOMCAT_PASSWORD }}
-          PACKAGES_TOKEN: ${{ secrets.PACKAGES_TOKEN }}
           CONTEXT_PATH: ${{ github.event.inputs.context_path || secrets.CONTEXT_PATH || '/bwp-latest' }}
         run: |
           set -e
