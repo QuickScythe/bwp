@@ -16,8 +16,15 @@ public class ErrorController {
     @ExceptionHandler(QuiptApiException.class)
     public ResponseEntity<ApiErrorResponse> handleQuiptApiException(
             QuiptApiException ex, HttpServletRequest httpServletRequest) {
-        ApiErrorResponse apiErrorResponse = new ApiErrorResponse(501, ex.getMessage());
-        return ResponseEntity.status(HttpStatus.valueOf(501)).contentType(MediaType.APPLICATION_JSON).body(apiErrorResponse);
+        ApiErrorResponse apiErrorResponse = new ApiErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.APPLICATION_JSON).body(apiErrorResponse);
+    }
+
+    @ExceptionHandler({Exception.class})
+    public ResponseEntity<ApiErrorResponse> handleGenericException(
+            Exception ex, HttpServletRequest httpServletRequest) {
+        ApiErrorResponse apiErrorResponse = new ApiErrorResponse(500, ex.getStackTrace().toString());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.APPLICATION_JSON).body(apiErrorResponse);
     }
 
     @ExceptionHandler({JSONException.class})
