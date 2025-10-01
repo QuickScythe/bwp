@@ -103,6 +103,7 @@ jobs:
           curl -fsS -u "$TOMCAT_USER:$TOMCAT_PASSWORD" "$TOMCAT_URL/manager/text/list" | sed -n "s|^.*$CONTEXT_PATH:.*$|&|p"
 
 
+
   dev_deploy:
     name: Deploy to Tomcat (DEV)
     needs: build
@@ -162,6 +163,7 @@ jobs:
           echo "Deployment request sent. Checking app status..."
           sleep 2
           curl -fsS -u "$TOMCAT_USER:$TOMCAT_PASSWORD" "$TOMCAT_URL/manager/text/list" | sed -n "s|^.*$CONTEXT_PATH:.*$|&|p"
+
 
 #
 # Required GitHub Secrets (set in repo Settings > Secrets and variables > Actions):
