@@ -192,6 +192,33 @@ jobs:
           upload-result: true
           # quick-fixes available in Ultimate and Ultimate Plus plans
           push-fixes: 'none'
+  test:
+    name: Deploy to Tomcat
+    needs: dev_deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: 'gradle'
+      - name: Make Gradle executable (if needed)
+        run: chmod +x gradlew
+      - name: Run Tests
+        run: ./gradlew test
+      - name: Test Summary
+        uses: test-summary/action@v2
+        with:
+          paths: "build/results/**/TEST-*.xml"
+          output: test-summary.md
+        if: always()
+      - name: Upload test summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-summary
+          path: '/tests-summary.md'
 
 #
 # Required GitHub Secrets (set in repo Settings > Secrets and variables > Actions):
