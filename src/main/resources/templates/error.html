@@ -39,7 +39,7 @@
       <nav class="breadcrumbs">
         <div class="container">
           <ol>
-            <li><a href="/">Return to Safety</a></li>
+            <li><a th:href="@{/}">Return to Safety</a></li>
             <li class="current" th:text="${status}">404</li>
           </ol>
         </div>
@@ -76,7 +76,7 @@
           </div>
 
           <div class="error-action" data-aos="fade-up" data-aos-delay="700">
-            <a href="/" class="btn btn-primary">Back to Home</a>
+            <a th:href="@{/}" class="btn btn-primary">Back to Home</a>
           </div>
         </div>
 
