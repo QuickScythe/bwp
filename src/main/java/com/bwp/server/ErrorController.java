@@ -23,7 +23,11 @@ public class ErrorController {
     @ExceptionHandler({Exception.class})
     public ResponseEntity<ApiErrorResponse> handleGenericException(
             Exception ex, HttpServletRequest httpServletRequest) {
-        ApiErrorResponse apiErrorResponse = new ApiErrorResponse(500, ex.getStackTrace().toString());
+        StringBuilder sb = new StringBuilder();
+        for (StackTraceElement element : ex.getStackTrace()) {
+            sb.append(element.toString()).append("\n");
+        }
+        ApiErrorResponse apiErrorResponse = new ApiErrorResponse(500, sb.toString());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.APPLICATION_JSON).body(apiErrorResponse);
     }
 
