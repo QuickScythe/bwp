@@ -218,7 +218,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: test-summary
-          path: '/test-summary.md'
+          path: 'test-summary.md'
 
 #
 # Required GitHub Secrets (set in repo Settings > Secrets and variables > Actions):
