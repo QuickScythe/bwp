@@ -16,7 +16,7 @@ public class ErrorController {
     @ExceptionHandler(QuiptApiException.class)
     public ResponseEntity<ApiErrorResponse> handleQuiptApiException(
             QuiptApiException ex, HttpServletRequest httpServletRequest) {
-        ApiErrorResponse apiErrorResponse = new ApiErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getMessage());
+        ApiErrorResponse apiErrorResponse = new ApiErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getMessage(), null);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.APPLICATION_JSON).body(apiErrorResponse);
     }
 
