@@ -59,5 +59,6 @@ public class TalentConfig extends Config {
         HttpResponse<InputStream> imageResponse = NetworkUtils.get(Utils.GET(), imageUrl, HttpResponse.BodyHandlers.ofInputStream());
         NetworkUtils.save(imageResponse, new File(actorFolder, "headshot.jpg"));
         talents.put(actor);
+        save();
     }
 }
