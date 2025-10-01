@@ -16,8 +16,7 @@ public class ResourceComponent implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         for(ExternalFile file : ExternalFile.values()) {
-            String basePath = "./" + Main.INTEGRATION.dataFolder().getName() + "/" + file.handlerRecord.folder + "/";
-            File directory = new File(basePath);
+            File directory = new File(Main.INTEGRATION.dataFolder(), file.handlerRecord.folder + File.separator).getAbsoluteFile();
             if (!directory.exists()) {
                 boolean success = directory.mkdirs();
                 if(!success) Main.LOGGER.error("Can't create directory {}.", directory.getAbsolutePath());
@@ -67,7 +66,7 @@ public class ResourceComponent implements WebMvcConfigurer {
     public record ResourceHandlerRecord(String folder) {
 
         public File file() {
-            return new File("./" + Main.INTEGRATION.dataFolder().getName() + "/" + folder);
+            return new File(Main.INTEGRATION.dataFolder(), folder).getAbsoluteFile();
         }
     }
 }

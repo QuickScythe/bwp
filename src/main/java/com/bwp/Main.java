@@ -43,11 +43,32 @@ public class Main extends SpringBootServletInitializer {
         File dataFolder;
 
         public Integration() {
-            dataFolder = new File("data");
+            this(resolveDataFolder());
         }
 
         public Integration(String dataFolderPath) {
-            dataFolder = new File(dataFolderPath);
+            dataFolder = new File(dataFolderPath).getAbsoluteFile();
+        }
+
+        private static String resolveDataFolder() {
+            // 1) System property overrides
+            String prop = System.getProperty("bwp.dataDir");
+            if (prop != null && !prop.isBlank()) return prop;
+            // 2) Environment variable
+            String env = System.getenv("BWP_DATA_DIR");
+            if (env != null && !env.isBlank()) return env;
+            // 3) Tomcat catalina.base
+            String catalinaBase = System.getProperty("catalina.base");
+            if (catalinaBase != null && !catalinaBase.isBlank()) {
+                return new File(catalinaBase, "bwp-data").getAbsolutePath();
+            }
+            // 4) User home fallback
+            String userHome = System.getProperty("user.home");
+            if (userHome != null && !userHome.isBlank()) {
+                return new File(new File(userHome, ".bwp"), "data").getAbsolutePath();
+            }
+            // 5) Current working directory fallback
+            return new File("data").getAbsolutePath();
         }
 
         @Override
@@ -55,8 +76,12 @@ public class Main extends SpringBootServletInitializer {
             if (!dataFolder.exists()) {
                 boolean created = dataFolder.mkdirs();
                 if (!created) {
-                    LOGGER.error("Failed to create data folder");
+                    LOGGER.error("Failed to create data folder at {}", dataFolder.getAbsolutePath());
+                } else {
+                    LOGGER.info("Created data folder at {}", dataFolder.getAbsolutePath());
                 }
+            } else {
+                LOGGER.info("Using data folder at {}", dataFolder.getAbsolutePath());
             }
         }
 
