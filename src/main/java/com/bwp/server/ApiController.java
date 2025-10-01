@@ -29,7 +29,7 @@ public class ApiController {
     }
 
     @GetMapping("/talents/{id}")
-    public Actor getTalent(@PathVariable String id) {
+    public Actor getTalent(@PathVariable("id") String id) {
         TalentConfig config = Configs.talent();
         try {
             Actor actor = config.talents.get(id);
@@ -55,8 +55,9 @@ public class ApiController {
         return "BWP Server API is running.";
     }
 
-    @PostMapping("/talents/{apiId}")
-    public Actor addTalent(@PathVariable int apiId) {
+    @PostMapping("/talents/add")
+    public Actor addTalent(@RequestParam("apiId") int apiId) {
+        System.out.println("Received request to add talent with API ID: " + apiId);
         try {
             TalentConfig config = Configs.talent();
             return config.actor(apiId);
