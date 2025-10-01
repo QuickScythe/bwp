@@ -80,11 +80,11 @@ public void sync() {
     JSONObject combinedCredits = data.getJSONObject("combined_credits");
 //        System.out.println(combinedCredits.toString(2));
     if (combinedCredits.has("cast")) {
-        try {
-            Files.write(Path.of("last_response.json"), combinedCredits.toString(2).getBytes());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+//        try {
+//            Files.write(Path.of("last_response.json"), combinedCredits.toString(2).getBytes());
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
         for (Object obj : combinedCredits.getJSONArray("cast")) {
             JSONObject creditJson = (JSONObject) obj;
 //                System.out.println(creditJson.toString(2));
