@@ -27,18 +27,22 @@ public class ErrorController {
         for (StackTraceElement element : ex.getStackTrace()) {
             sb.append(element.toString()).append("\n");
         }
-        ApiErrorResponse apiErrorResponse = new ApiErrorResponse(500, sb.toString());
+        ApiErrorResponse apiErrorResponse = new ApiErrorResponse(500, ex.getMessage(), sb.toString());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.APPLICATION_JSON).body(apiErrorResponse);
     }
 
     @ExceptionHandler({JSONException.class})
     public ResponseEntity<ApiErrorResponse> handleNoHandlerFoundException(
             JSONException ex, HttpServletRequest httpServletRequest) {
-        ApiErrorResponse apiErrorResponse = new ApiErrorResponse(500, "Resource not found");
+        StringBuilder sb = new StringBuilder();
+        for (StackTraceElement element : ex.getStackTrace()) {
+            sb.append(element.toString()).append("\n");
+        }
+        ApiErrorResponse apiErrorResponse = new ApiErrorResponse(500, ex.getMessage(), sb.toString());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).contentType(MediaType.APPLICATION_JSON).body(apiErrorResponse);
     }
 
-    public record ApiErrorResponse(int code, String message) {
+    public record ApiErrorResponse(int code, String message, String stackTrack) {
 
     }
 
