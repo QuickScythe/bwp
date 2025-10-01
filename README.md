@@ -44,14 +44,17 @@ A Spring Boot web application for managing and displaying talent/actor data, pac
 ```
 ./gradlew clean bootWar
 ```
-The WAR will be output to `build/libs/bwp-latest.war`.
+The WAR will be output to `build/libs/ROOT.war` (for ROOT context deployment).
 
 ### Deploy to Tomcat
-1. Copy the WAR to your Tomcat `webapps` directory, or use the provided GitHub Actions workflow for automated deployment.
-2. Ensure your Tomcat user has the `manager-script` role.
+1. Copy `ROOT.war` to your Tomcat `webapps/` directory (deploys at `/`), or use the provided GitHub Actions workflow.
+2. Ensure your Tomcat user has the `manager-script` role if using the Manager API.
 
 ### Configuration
-- Main configuration files are in the `data/` directory (`config.json`, `talents.json`, and per-actor folders).
+- Application data directory (where `config.json`, `talents.json`, and `actors/` live) is configurable via:
+  - System property: `-Dbwp.dataDir=/absolute/path/to/bwp-data`
+  - Environment variable: `BWP_DATA_DIR=/absolute/path/to/bwp-data`
+  - Defaults to `${catalina.base}/bwp-data` on Tomcat, then `${user.home}/.bwp/data`, then `./data`.
 - Logging is configured via `src/main/resources/logback.xml`.
 
 ## Endpoints

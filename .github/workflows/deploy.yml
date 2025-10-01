@@ -4,12 +4,13 @@ on:
   push:
     branches:
       - master
+      - development
   workflow_dispatch:
     inputs:
       context_path:
         description: "Tomcat context path (use '/' for ROOT)"
         required: false
-        default: "/"
+        default: "/bwp-latest"
 
 jobs:
   build:
@@ -39,7 +40,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: bwp-war
-          path: build/libs/ROOT.war
+          path: build/libs/bwp-latest.war
 
   deploy:
     name: Deploy to Tomcat
@@ -66,7 +67,68 @@ jobs:
           CONTEXT_PATH: ${{ github.event.inputs.context_path || secrets.CONTEXT_PATH || '/' }}
         run: |
           set -e
-          WAR_FILE="dist/ROOT.war"
+          WAR_FILE="dist/bwp-latest.war"
+          if [ ! -f "$WAR_FILE" ]; then
+            echo "WAR not found at $WAR_FILE" >&2
+            exit 1
+          fi
+
+          if [ -z "$TOMCAT_URL" ] || [ -z "$TOMCAT_USER" ] || [ -z "$TOMCAT_PASSWORD" ]; then
+            echo "Missing TOMCAT_URL/TOMCAT_USER/TOMCAT_PASSWORD secrets." >&2
+            exit 1
+          fi
+
+          # Normalize context path to start with '/'
+          if [ -z "$CONTEXT_PATH" ]; then CONTEXT_PATH="/bwp-latest"; fi
+          case "$CONTEXT_PATH" in
+            /*) ;;
+            *) CONTEXT_PATH="/$CONTEXT_PATH" ;;
+          esac
+
+          echo "Using context path: $CONTEXT_PATH"
+
+          # Try undeploy first to ensure a clean state (ignore failures)
+          echo "Attempt undeploy (ignore errors)" || true
+          curl -fsS -u "$TOMCAT_USER:$TOMCAT_PASSWORD" \
+            "$TOMCAT_URL/manager/text/undeploy?path=$CONTEXT_PATH" || true
+
+          # Deploy new WAR
+          echo "Deploying new WAR to $TOMCAT_URL$CONTEXT_PATH"
+          curl -fsS -u "$TOMCAT_USER:$TOMCAT_PASSWORD" \
+            -T "$WAR_FILE" \
+            "$TOMCAT_URL/manager/text/deploy?path=$CONTEXT_PATH&update=true"
+
+          echo "Deployment request sent. Checking app status..."
+          sleep 2
+          curl -fsS -u "$TOMCAT_USER:$TOMCAT_PASSWORD" "$TOMCAT_URL/manager/text/list" | sed -n "s|^.*$CONTEXT_PATH:.*$|&|p"
+
+
+  dev_deploy:
+    name: Deploy to Tomcat (DEV)
+    needs: build
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'push' && github.ref != 'refs/heads/main')
+    steps:
+      - name: Download WAR artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: bwp-war
+          path: dist
+
+      - name: Show downloaded files
+        run: ls -la dist
+
+      - name: Deploy via Tomcat Manager text API (update if exists)
+        env:
+          TOMCAT_URL: ${{ secrets.TOMCAT_URL }}
+          TOMCAT_USER: ${{ secrets.TOMCAT_USER }}
+          TOMCAT_PASSWORD: ${{ secrets.TOMCAT_PASSWORD }}
+          CONTEXT_PATH: ${{ '/bwp-dev' }}
+        run: |
+          set -e
+          WAR_FILE="dist/bwp-latest.war"
           if [ ! -f "$WAR_FILE" ]; then
             echo "WAR not found at $WAR_FILE" >&2
             exit 1
