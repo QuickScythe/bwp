@@ -104,6 +104,7 @@ jobs:
 
 
 
+
   dev_deploy:
     name: Deploy to Tomcat (DEV)
     needs: build
@@ -164,6 +165,32 @@ jobs:
           sleep 2
           curl -fsS -u "$TOMCAT_USER:$TOMCAT_PASSWORD" "$TOMCAT_URL/manager/text/list" | sed -n "s|^.*$CONTEXT_PATH:.*$|&|p"
 
+
+  qodana:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      checks: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - name: 'Qodana Scan'
+        uses: JetBrains/qodana-action@v2025.2
+        env:
+          QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
+        with:
+          # In pr-mode: 'true' Qodana checks only changed files
+          pr-mode: false
+          use-caches: true
+          post-pr-comment: true
+          use-annotations: true
+          # Upload Qodana results (SARIF, other artifacts, logs) as an artifact to the job
+          upload-result: false
+          # quick-fixes available in Ultimate and Ultimate Plus plans
+          push-fixes: 'none'
 
 #
 # Required GitHub Secrets (set in repo Settings > Secrets and variables > Actions):
