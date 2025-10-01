@@ -193,7 +193,7 @@ jobs:
           # quick-fixes available in Ultimate and Ultimate Plus plans
           push-fixes: 'none'
   test:
-    name: Deploy to Tomcat
+    name: Run Tests
     needs: dev_deploy
     runs-on: ubuntu-latest
     steps:
@@ -218,7 +218,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: test-summary
-          path: '/tests-summary.md'
+          path: '/test-summary.md'
 
 #
 # Required GitHub Secrets (set in repo Settings > Secrets and variables > Actions):
