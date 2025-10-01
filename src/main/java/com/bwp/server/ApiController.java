@@ -1,8 +1,10 @@
 package com.bwp.server;
 
+import com.bwp.Main;
 import com.bwp.data.Actor;
 import com.bwp.data.config.Configs;
 import com.bwp.data.config.TalentConfig;
+import com.quiptmc.core.config.ConfigManager;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -115,7 +117,7 @@ public class ApiController {
     public Actor addTalent(@RequestParam("apiId") int apiId) {
         System.out.println("Received request to add talent with API ID: " + apiId);
         try {
-            TalentConfig config = Configs.talent();
+            TalentConfig config = ConfigManager.getConfig(Main.INTEGRATION, TalentConfig.class);
             return config.actor(apiId);
         } catch (Throwable t) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to add talent: " + apiId, t);

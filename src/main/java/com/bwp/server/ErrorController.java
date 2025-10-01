@@ -16,7 +16,7 @@ public class ErrorController {
     @ExceptionHandler(QuiptApiException.class)
     public ResponseEntity<ApiErrorResponse> handleQuiptApiException(
             QuiptApiException ex, HttpServletRequest httpServletRequest) {
-        ApiErrorResponse apiErrorResponse = new ApiErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getMessage(), null);
+        ApiErrorResponse apiErrorResponse = new ApiErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getMessage(), null, null);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.APPLICATION_JSON).body(apiErrorResponse);
     }
 
@@ -27,7 +27,16 @@ public class ErrorController {
         for (StackTraceElement element : ex.getStackTrace()) {
             sb.append(element.toString()).append("\n");
         }
-        ApiErrorResponse apiErrorResponse = new ApiErrorResponse(500, ex.getMessage(), sb.toString());
+        StringBuilder causeBuilder = new StringBuilder();
+        Throwable cause = ex.getCause();
+        while (cause != null) {
+            causeBuilder.append("Caused by: ").append(cause.toString()).append("\n");
+            for (StackTraceElement element : cause.getStackTrace()) {
+                causeBuilder.append("\tat ").append(element.toString()).append("\n");
+            }
+            cause = cause.getCause();
+        }
+        ApiErrorResponse apiErrorResponse = new ApiErrorResponse(500, ex.getMessage(), sb.toString(), causeBuilder.toString());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.APPLICATION_JSON).body(apiErrorResponse);
     }
 
@@ -38,11 +47,20 @@ public class ErrorController {
         for (StackTraceElement element : ex.getStackTrace()) {
             sb.append(element.toString()).append("\n");
         }
-        ApiErrorResponse apiErrorResponse = new ApiErrorResponse(500, ex.getMessage(), sb.toString());
+        StringBuilder causeBuilder = new StringBuilder();
+        Throwable cause = ex.getCause();
+        while (cause != null) {
+            causeBuilder.append("Caused by: ").append(cause.toString()).append("\n");
+            for (StackTraceElement element : cause.getStackTrace()) {
+                causeBuilder.append("\tat ").append(element.toString()).append("\n");
+            }
+            cause = cause.getCause();
+        }
+        ApiErrorResponse apiErrorResponse = new ApiErrorResponse(500, ex.getMessage(), sb.toString(), causeBuilder.toString());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).contentType(MediaType.APPLICATION_JSON).body(apiErrorResponse);
     }
 
-    public record ApiErrorResponse(int code, String message, String stackTrack) {
+    public record ApiErrorResponse(int code, String message, String stackTrack, String cause) {
 
     }
 
