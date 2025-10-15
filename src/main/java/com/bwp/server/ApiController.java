@@ -2,8 +2,8 @@ package com.bwp.server;
 
 import com.bwp.Main;
 import com.bwp.data.Actor;
-import com.bwp.data.config.Configs;
 import com.bwp.data.config.TalentConfig;
+import com.bwp.utils.Utils;
 import com.quiptmc.core.config.ConfigManager;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -26,13 +26,13 @@ public class ApiController {
 
     @GetMapping("/talents")
     public List<Actor> listTalents() {
-        TalentConfig config = Configs.talent();
+        TalentConfig config = Utils.getConfig(TalentConfig.class);
         return new ArrayList<>(config.talents.values());
     }
 
     @GetMapping("/talents/{id}")
     public Actor getTalent(@PathVariable("id") String id) {
-        TalentConfig config = Configs.talent();
+        TalentConfig config = Utils.getConfig(TalentConfig.class);
         Actor actor = config.talents.get(id);
         if (actor == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Talent not found: " + id);

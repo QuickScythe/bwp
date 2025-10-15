@@ -2,7 +2,6 @@ package com.bwp.server;
 
 import com.bwp.Main;
 import com.bwp.data.Actor;
-import com.bwp.data.config.Configs;
 import com.bwp.data.config.TalentConfig;
 import com.quiptmc.core.config.ConfigManager;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,7 +13,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 @Controller
 public class PageController {
@@ -34,7 +32,7 @@ public class PageController {
     }
 
     @GetMapping("/talent")
-    public String talent(Model model) throws SQLException {
+    public String talent(Model model) {
 
 
         TalentConfig config = ConfigManager.getConfig(Main.INTEGRATION, TalentConfig.class);

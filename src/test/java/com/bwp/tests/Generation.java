@@ -1,9 +1,5 @@
 package com.bwp.tests;
 
-import com.bwp.Main;
-import com.bwp.data.config.Configs;
-import com.bwp.data.config.TalentConfig;
-import com.bwp.utils.Utils;
 import org.junit.jupiter.api.Test;
 
 public class Generation {
