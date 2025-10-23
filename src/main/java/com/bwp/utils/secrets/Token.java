@@ -2,11 +2,11 @@ package com.bwp.utils.secrets;
 
 
 import com.bwp.Main;
-import com.bwp.data.MapManager;
 import com.bwp.data.account.User;
 import com.bwp.data.config.UsersConfig;
 import com.quiptmc.core.config.ConfigManager;
 import com.quiptmc.core.config.ConfigMap;
+import com.quiptmc.core.config.ConfigMapManager;
 import com.quiptmc.core.config.ConfigObject;
 
 import static com.bwp.utils.secrets.TokenUtils.*;
@@ -19,7 +19,7 @@ public class Token extends ConfigObject {
     public String userId;
     public long created;
     public ConfigMap<Permission> permissions = new ConfigMap<>();
-    private final MapManager<Permission> permissionManager = new MapManager<>(permissions);
+    private final ConfigMapManager<Permission> permissionManager = new ConfigMapManager<>(permissions);
 
     public Token() {
         this.id = generateSecret();
@@ -34,7 +34,7 @@ public class Token extends ConfigObject {
         created = System.currentTimeMillis();
     }
 
-    public MapManager<Permission> permissions(){
+    public ConfigMapManager<Permission> permissions(){
         return permissionManager;
     }
 
