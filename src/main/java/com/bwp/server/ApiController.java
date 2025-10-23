@@ -2,9 +2,14 @@ package com.bwp.server;
 
 import com.bwp.Main;
 import com.bwp.data.Actor;
+import com.bwp.data.account.User;
 import com.bwp.data.config.TalentConfig;
+import com.bwp.data.config.UsersConfig;
 import com.bwp.utils.Utils;
+import com.bwp.utils.secrets.Permissions;
+import com.bwp.utils.secrets.Token;
 import com.quiptmc.core.config.ConfigManager;
+import org.json.JSONObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -47,8 +52,26 @@ public class ApiController {
     }
 
     @PostMapping("/talents/add")
-    public Actor addTalent(@RequestParam("apiId") int apiId) {
-        System.out.println("Received request to add talent with API ID: " + apiId);
+    public Actor addTalent(@RequestParam("apiId") int apiId, @RequestBody String body) {
+        Main.LOGGER.info("Received request to add talent with API ID: {}", apiId);
+        if(!body.trim().startsWith("{") || !body.trim().endsWith("}"))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid talent data format.");
+
+        JSONObject data = new JSONObject(body);
+        if(!data.has("token"))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Missing required field: token");
+        String rawToken = data.getString("token");
+        UsersConfig usersConfig = ConfigManager.getConfig(Main.INTEGRATION, UsersConfig.class);
+        Optional<User> owner = usersConfig.searchByToken(rawToken);
+        if(owner.isEmpty())
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Token not found.");
+        Token token = owner.get().tokens.get(rawToken);
+        if(token.permissions.contains(Permissions.MANAGE_TALENTS) || token.permissions.contains("*")) {
+            Main.LOGGER.info("Token validated for user: {}", owner.get().username);
+        } else {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Insufficient permissions to add talent.");
+        }
+
         try {
             TalentConfig config = ConfigManager.getConfig(Main.INTEGRATION, TalentConfig.class);
             return config.actor(apiId);

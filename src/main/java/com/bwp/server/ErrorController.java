@@ -1,6 +1,7 @@
 package com.bwp.server;
 
 import com.quiptmc.core.exceptions.QuiptApiException;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
 import org.json.JSONException;
 import org.springframework.http.HttpStatus;
@@ -8,6 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.server.ResponseStatusException;
 
 @ControllerAdvice
 public class ErrorController {
@@ -26,6 +28,20 @@ public class ErrorController {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.APPLICATION_JSON).body(apiErrorResponse);
     }
 
+    @ExceptionHandler({ResponseStatusException.class})
+    public ResponseEntity<ApiErrorResponse> handleResponseStatusException(
+            ResponseStatusException ex, HttpServletRequest httpServletRequest) {
+        return ResponseEntity
+                .status(ex.getStatusCode().value())
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(new ApiErrorResponse(
+                        ex.getStatusCode().value(),
+                        ex.getReason(),
+                        null,
+                        null
+                ));
+    }
+
     private ApiErrorResponse printException(Exception ex) {
         StringBuilder sb = new StringBuilder();
         for (StackTraceElement element : ex.getStackTrace()) {
@@ -40,7 +56,9 @@ public class ErrorController {
             }
             cause = cause.getCause();
         }
-        return new ApiErrorResponse(500, ex.getMessage(), sb.toString(), causeBuilder.toString());
+        int code = ex instanceof ResponseStatusException resp ? resp.getStatusCode().value() : HttpStatus.INTERNAL_SERVER_ERROR.value();
+
+        return new ApiErrorResponse(code, ex.getMessage(), sb.toString(), causeBuilder.toString());
     }
 
     @ExceptionHandler({JSONException.class})
@@ -50,7 +68,7 @@ public class ErrorController {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).contentType(MediaType.APPLICATION_JSON).body(apiErrorResponse);
     }
 
-    public record ApiErrorResponse(int code, String message, String stackTrack, String cause) {
+    public record ApiErrorResponse(int code, String message, @Nullable String stackTrack,@Nullable String cause) {
 
     }
 

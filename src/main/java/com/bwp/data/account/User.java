@@ -1,5 +1,8 @@
 package com.bwp.data.account;
 
+import com.bwp.utils.secrets.Permission;
+import com.bwp.utils.secrets.Permissions;
+import com.bwp.utils.secrets.Token;
 import com.quiptmc.core.config.ConfigMap;
 import com.quiptmc.core.config.ConfigObject;
 
@@ -10,57 +13,84 @@ import java.util.Map;
 public class User extends ConfigObject {
 
     private final PermissionManager permissionManager = new PermissionManager();
+    private final TokenManager tokenManager = new TokenManager();
     public String username;
     public String password;
-    public ConfigMap<Permission> permissions;
+    public ConfigMap<Permission> permissions = new ConfigMap<>();
+    public ConfigMap<Token> tokens = new ConfigMap<>();
 
     public String username() {
         return username;
     }
 
-    public static class Permission extends ConfigObject {
+    public PermissionManager permissions(){
+        return permissionManager;
+    }
 
-        public String description;
+    public TokenManager tokens() {
+        return tokenManager;
+    }
 
 
-        @Override
-        public boolean equals(Object obj) {
-            if (obj instanceof Permission other)
-                return id.equals(other.id);
-            if (obj instanceof String key)
-                return id.equals(key);
-            return false;
+    public class TokenManager {
+        public void add(Token token) {
+            tokens.put(token);
+        }
+
+        public void remove(Token token) {
+            tokens.remove(token);
+        }
+
+        public boolean validate(Token token){
+            Token storedToken = tokens.get(token.id);
+            if (storedToken == null) {
+                return false;
+            }
+            if (storedToken.expired()) {
+                tokens.remove(storedToken);
+                return false;
+            }
+            return true;
+        }
+
+        public Collection<Token> list() {
+            return tokens.values();
         }
     }
 
     public class PermissionManager {
 
-        Map<String, Permission> cache = new HashMap<>();
+//        Map<String, Permission> cache = new HashMap<>();
 
-        private Permission get(String permissionName) {
-            if (cache.containsKey(permissionName)) return cache.get(permissionName);
-            Permission permission = new Permission();
-            permission.id = permissionName;
-            permission.description = "No description provided";
-            cache.put(permissionName, permission);
-            return permission;
+        private Permission get(String permission) {
+            return Permissions.get(permission).orElseThrow(()->new IllegalStateException("Permission not found: " + permission));
         }
 
         public boolean has(String permission) {
             Permission perm = get(permission);
-            return permissions.contains(perm.id);
+            return has(perm);
+        }
+
+        public boolean has(Permission permission){
+            return permissions.contains(permission);
         }
 
         public void add(String permission) {
-            Permission perm = get(permission);
-            if (!permissions.contains(perm.id)) {
-                permissions.put(perm);
+            add(get(permission));
+        }
+
+        public void add(Permission permission){
+            if (!permissions.contains(permission)) {
+                permissions.put(permission);
             }
         }
 
         public void remove(String permission) {
-            Permission perm = get(permission);
-            permissions.remove(perm);
+            remove(get(permission));
+        }
+
+        public void remove(Permission permission){
+            permissions.remove(permission);
         }
 
         public Collection<Permission> list() {

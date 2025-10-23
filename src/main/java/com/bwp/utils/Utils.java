@@ -6,6 +6,9 @@ import com.bwp.data.account.User;
 import com.bwp.data.config.DefaultConfig;
 import com.bwp.data.config.TalentConfig;
 import com.bwp.data.config.UsersConfig;
+import com.bwp.utils.secrets.Permission;
+import com.bwp.utils.secrets.Permissions;
+import com.bwp.utils.secrets.Token;
 import com.quiptmc.core.config.Config;
 import com.quiptmc.core.config.ConfigManager;
 import com.quiptmc.core.config.factories.GenericFactory;
@@ -29,6 +32,8 @@ public class Utils {
         ConfigManager.registerFactory(new GenericFactory<>(Actor.class));
         ConfigManager.registerFactory(new GenericFactory<>(Actor.Credit.class));
         ConfigManager.registerFactory(new GenericFactory<>(User.class));
+        ConfigManager.registerFactory(new GenericFactory<>(Permission.class));
+        ConfigManager.registerFactory(new GenericFactory<>(Token.class));
 
 
         ConfigManager.registerConfig(integration, TalentConfig.class);
@@ -53,6 +58,8 @@ public class Utils {
                 throw new RuntimeException(e);
             }
             User admin = usersConfig.create("admin", encryptedPassword);
+            admin.permissions().add("*");
+            usersConfig.save();
         }
     }
 

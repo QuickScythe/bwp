@@ -9,6 +9,7 @@ import com.quiptmc.core.config.ConfigValue;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.util.Optional;
 import java.util.UUID;
 
 @ConfigTemplate(name="users", ext = ConfigTemplate.Extension.JSON)
@@ -48,5 +49,21 @@ public class UsersConfig extends Config {
         users.put(user);
         save();
         return user;
+    }
+
+    public Optional<User> searchByToken(String rawToken) {
+        for (User user : users.values()) {
+            for (var token : user.tokens.values()) {
+                if (token.id.equals(rawToken)) {
+                    if (token.expired()) {
+                        user.tokens.remove(token);
+                        save();
+                        return Optional.empty();
+                    }
+                    return Optional.of(user);
+                }
+            }
+        }
+        return Optional.empty();
     }
 }
