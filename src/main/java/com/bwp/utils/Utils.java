@@ -58,7 +58,8 @@ public class Utils {
                 throw new RuntimeException(e);
             }
             User admin = usersConfig.create("admin", encryptedPassword);
-            admin.permissions().add("*");
+            admin.permissions().add(Permissions.ALL);
+
             usersConfig.save();
         }
     }
