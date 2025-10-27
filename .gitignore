@@ -43,3 +43,5 @@ bin/
 /.idea/
 /data/
 /last_response.json
+/adminPassword.txt
+/logs/
