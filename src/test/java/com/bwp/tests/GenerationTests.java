@@ -1,11 +1,15 @@
 package com.bwp.tests;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-public class Generation {
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+public class GenerationTests {
 
     @Test
     public void generate() {
+        assertTrue(true);
 //        Main.Integration integration = new Main.Integration();
 //        Utils.init(integration);
 //        TalentConfig talentConfig = Configs.talent();

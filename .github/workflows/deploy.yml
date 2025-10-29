@@ -195,6 +195,9 @@ jobs:
   test:
     name: Run Tests
     needs: dev_deploy
+    env:
+      GRADLE_OPTS: -Dorg.gradle.daemon=false
+      PACKAGES_TOKEN: ${{ secrets.PACKAGES_TOKEN }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
