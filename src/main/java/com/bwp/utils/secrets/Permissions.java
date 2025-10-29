@@ -18,6 +18,7 @@ public class Permissions {
     public static final Permission VIEW_AUDIT_LOGS = register("auditlogs.view", "Allows viewing of audit logs");
     public static final Permission MANAGE_PERMISSIONS = register("permissions.manage", "Allows management of permissions");
     public static final Permission MANAGE_TALENTS = register("talents.manage", "Allows management of talents");
+    public static final Permission NONE = register ("none", "No permissions granted");
 
 
 
@@ -27,7 +28,7 @@ public class Permissions {
         return permission;
     }
 
-    public static Optional<Permission> get(String permission) {
+    public static Optional<Permission> of(String permission) {
         return PERMISSIONS.get(permission);
     }
 }

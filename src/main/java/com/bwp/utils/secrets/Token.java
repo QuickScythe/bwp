@@ -32,6 +32,7 @@ public class Token extends ConfigObject {
         this.id = generateSecret();
         this.userId = user.id;
         created = System.currentTimeMillis();
+        user.tokens.put(this);
     }
 
     public ConfigMapManager<Permission> permissions(){

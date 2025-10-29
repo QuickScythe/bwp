@@ -1,7 +1,7 @@
 package com.bwp.utils;
 
 import com.bwp.Main;
-import com.bwp.data.Actor;
+import com.bwp.data.Talent;
 import com.bwp.data.account.User;
 import com.bwp.data.config.DefaultConfig;
 import com.bwp.data.config.TalentConfig;
@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.time.Duration;
 import java.util.Random;
-import java.util.UUID;
 
 public class Utils {
 
@@ -29,8 +28,8 @@ public class Utils {
 
     public static void init(Main.Integration integration) {
         Utils.integration = integration;
-        ConfigManager.registerFactory(new GenericFactory<>(Actor.class));
-        ConfigManager.registerFactory(new GenericFactory<>(Actor.Credit.class));
+        ConfigManager.registerFactory(new GenericFactory<>(Talent.class));
+        ConfigManager.registerFactory(new GenericFactory<>(Talent.Credit.class));
         ConfigManager.registerFactory(new GenericFactory<>(User.class));
         ConfigManager.registerFactory(new GenericFactory<>(Permission.class));
         ConfigManager.registerFactory(new GenericFactory<>(Token.class));
@@ -59,6 +58,8 @@ public class Utils {
             }
             User admin = usersConfig.create("admin", encryptedPassword);
             admin.permissions().add(Permissions.ALL);
+            Token token = new Token(admin);
+            token.permissions().add(Permissions.ALL);
 
             usersConfig.save();
         }

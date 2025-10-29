@@ -8,11 +8,11 @@ If you are browsing this repository to learn, feel free to read the code, review
 
 ---
 
-A Spring Boot web application for managing and displaying talent/actor data, packaged as a deployable WAR for Tomcat. The project leverages Thymeleaf for templating, supports scheduled tasks, and integrates with the QuiptMC core library.
+A Spring Boot web application for managing and displaying talent data, packaged as a deployable WAR for Tomcat. The project leverages Thymeleaf for templating, supports scheduled tasks, and integrates with the QuiptMC core library.
 
 ## Features
 - Home and talent web pages (Thymeleaf-based)
-- Loads and displays talent/actor data from configuration files
+- Loads and displays talent data from configuration files
 - Queue management and scheduled background tasks
 - Logging to both console and rolling file (Tomcat-compatible)
 - WAR packaging for easy deployment to Tomcat
@@ -23,7 +23,7 @@ A Spring Boot web application for managing and displaying talent/actor data, pac
 ├── data/                  # Application data and configuration
 │   ├── config.json
 │   ├── talents.json
-│   └── actors/            # Per-actor data folders
+│   └── actors/            # Per-talent data folders
 ├── src/
 │   ├── main/
 │   │   ├── java/com/bwp/  # Main Java source code

@@ -1,7 +1,7 @@
 package com.bwp.server;
 
 import com.bwp.Main;
-import com.bwp.data.Actor;
+import com.bwp.data.Talent;
 import com.bwp.data.config.TalentConfig;
 import com.quiptmc.core.config.ConfigManager;
 import jakarta.servlet.http.HttpServletRequest;
@@ -37,9 +37,9 @@ public class PageController {
 
         TalentConfig config = ConfigManager.getConfig(Main.INTEGRATION, TalentConfig.class);
 
-        Map<String, Actor> people = new HashMap<>();
-        for(Actor actor : config.talents.values()){
-            people.put(actor.fullName(), actor);
+        Map<String, Talent> people = new HashMap<>();
+        for(Talent talent : config.talents.values()){
+            people.put(talent.fullName(), talent);
 
         }
         model.addAttribute("people", people);
