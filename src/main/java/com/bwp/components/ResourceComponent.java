@@ -3,6 +3,7 @@ package com.bwp.components;
 import com.bwp.Main;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
+import org.springframework.lang.NonNull;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.resource.PathResourceResolver;
@@ -14,7 +15,7 @@ import java.io.IOException;
 public class ResourceComponent implements WebMvcConfigurer {
 
     @Override
-    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+    public void addResourceHandlers(@NonNull ResourceHandlerRegistry registry) {
         for(ExternalFile file : ExternalFile.values()) {
             File directory = new File(Main.INTEGRATION.dataFolder(), file.handlerRecord.folder + File.separator).getAbsoluteFile();
             if (!directory.exists()) {
@@ -33,7 +34,7 @@ public class ResourceComponent implements WebMvcConfigurer {
                     .resourceChain(true)
                     .addResolver(new PathResourceResolver() {
                         @Override
-                        protected Resource getResource(String resourcePath, Resource location) throws IOException {
+                        protected Resource getResource(@NonNull String resourcePath, @NonNull Resource location) throws IOException {
                             Resource resource = super.getResource(resourcePath, location);
                             if (resource == null || !resource.exists()) {
                                 return null;

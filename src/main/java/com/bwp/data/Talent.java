@@ -13,23 +13,20 @@ import com.quiptmc.core.utils.net.NetworkUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.net.http.HttpResponse;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.Duration;
 
-public class Actor extends ConfigObject {
+public class Talent extends ConfigObject {
 
     public String first_name;
     public String last_name;
     public String about;
 
-    public Actor() {
+    public Talent() {
 
     }
 
-    public Actor(int apiId) {
+    public Talent(int apiId) {
         this.id = String.valueOf(apiId);
         String url = "https://api.themoviedb.org/3/person/" + id;
         String token = ConfigManager.getConfig(Main.INTEGRATION, DefaultConfig.class).api_token;

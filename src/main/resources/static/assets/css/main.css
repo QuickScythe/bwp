@@ -68,6 +68,73 @@ body {
   font-family: var(--default-font);
 }
 
+.loginBox{
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%,-50%);
+	width: 350px;
+	min-height: 200px;
+	background: var(--card-bg-color);
+	border-radius: 10px;
+	padding: 40px;
+	box-sizing: border-box
+}
+.user{
+	margin: 0 auto;
+	display: block;
+	margin-bottom: 20px
+}
+.loginBox input{
+	width: 100%;
+	margin-bottom: 20px
+}
+.loginBox input[type="text"], .loginBox input[type="password"]{
+	border: none;
+	border-bottom: 2px solid #262626;
+	outline: none;
+	height: 40px;
+	color: #fff;
+	background: transparent;
+	font-size: 16px;
+	padding-left: 20px;
+	box-sizing: border-box
+}
+.loginBox input[type="text"]:hover, .loginBox input[type="password"]:hover{
+	color: var(--highlight-color);
+	border: 1px solid var(--highlight-color);
+	box-shadow: 0 0 5px var(--highlight-color), 0 0 10px var(--highlight-color), 0 0 15px var(--highlight-color), 0 2px 0 black
+}
+.loginBox input[type="text"]:focus, .loginBox input[type="password"]:focus{
+	border-bottom: 2px solid var(--highlight-color)
+}
+.inputBox{
+	position: relative
+}
+.inputBox span{
+	position: absolute;
+	top: 10px;
+	color: #262626
+}
+.loginBox input[type="submit"]{
+	border: none;
+	outline: none;
+	height: 40px;
+	font-size: 16px;
+	background: var(--highlight-color);
+	color: #fff;
+	border-radius: 20px;
+	cursor: pointer
+}
+.loginBox a{
+	color: var(--highlight-color);
+	font-size: 14px;
+	font-weight: bold;
+	text-decoration: none;
+	text-align: center;
+	display: block
+}
+
 a {
   color: var(--accent-color);
   text-decoration: none;

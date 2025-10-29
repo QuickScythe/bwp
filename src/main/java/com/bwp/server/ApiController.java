@@ -1,10 +1,13 @@
 package com.bwp.server;
 
 import com.bwp.Main;
-import com.bwp.data.Actor;
-import com.bwp.data.config.Configs;
-import com.bwp.data.config.TalentConfig;
+import com.bwp.data.account.User;
+import com.bwp.data.config.UsersConfig;
+import com.bwp.utils.secrets.Permission;
+import com.bwp.utils.secrets.Permissions;
+import com.bwp.utils.secrets.Token;
 import com.quiptmc.core.config.ConfigManager;
+import org.json.JSONObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -24,36 +27,36 @@ public class ApiController {
         return status;
     }
 
-    @GetMapping("/talents")
-    public List<Actor> listTalents() {
-        TalentConfig config = Configs.talent();
-        return new ArrayList<>(config.talents.values());
-    }
-
-    @GetMapping("/talents/{id}")
-    public Actor getTalent(@PathVariable("id") String id) {
-        TalentConfig config = Configs.talent();
-        Actor actor = config.talents.get(id);
-        if (actor == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Talent not found: " + id);
-        }
-        return actor;
-
-    }
 
     @GetMapping()
-    public String root() {
+    public Object root() {
         return "BWP Server API is running.";
     }
 
-    @PostMapping("/talents/add")
-    public Actor addTalent(@RequestParam("apiId") int apiId) {
-        System.out.println("Received request to add talent with API ID: " + apiId);
-        try {
-            TalentConfig config = ConfigManager.getConfig(Main.INTEGRATION, TalentConfig.class);
-            return config.actor(apiId);
-        } catch (Throwable t) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to add talent: " + apiId, t);
+
+    public Token validateToken(String tokenContainer, Permission... permissions) {
+        String tokenId = extractTokenID(tokenContainer);
+        UsersConfig usersConfig = ConfigManager.getConfig(Main.INTEGRATION, UsersConfig.class);
+        Optional<User> owner = usersConfig.searchByToken(tokenId);
+        if (owner.isEmpty())
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Token not found.");
+        Token token = owner.get().tokens.get(tokenId);
+        if (token.permissions.containsAll(permissions) || token.permissions.contains(Permissions.ALL)) {
+            Main.LOGGER.info("Token validated for user: {}", owner.get().username);
+            return token;
         }
+        return null;
+    }
+
+
+
+    private String extractTokenID(String tokenContainer) {
+        if (!tokenContainer.trim().startsWith("{") || !tokenContainer.trim().endsWith("}"))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid talent data format.");
+
+        JSONObject data = new JSONObject(tokenContainer);
+        if (!data.has("token"))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Missing required field: token");
+        return data.getString("token");
     }
 }
