@@ -22,11 +22,28 @@ import java.nio.file.Files;
 import java.time.Duration;
 import java.util.Random;
 
+/**
+ * Utility helpers for application-wide configuration and HTTP access.
+ * <p>
+ * Responsibilities:
+ * - Hold a reference to the Main.Integration instance.
+ * - Register QuiptMC config factories and configuration classes.
+ * - Bootstrap a default admin user and token when users configuration is empty.
+ * - Provide a preconfigured HttpConfig for external API calls (e.g., TMDB).
+ */
 public class Utils {
 
     private static Main.Integration integration;
 
-    public static void init(Main.Integration integration) {
+    /**
+         * Initializes utility state and config system for the application.
+         * <p>
+         * Registers Config factories and configuration classes, and bootstraps a default
+         * admin user and token when the users configuration is empty.
+         *
+         * @param integration the running Main.Integration instance
+         */
+        public static void init(Main.Integration integration) {
         Utils.integration = integration;
         ConfigManager.registerFactory(new GenericFactory<>(Talent.class));
         ConfigManager.registerFactory(new GenericFactory<>(Talent.Credit.class));
@@ -65,15 +82,35 @@ public class Utils {
         }
     }
 
+    /**
+     * Returns the active integration instance associated with the application.
+     *
+     * @return the Main.Integration instance set during initialization
+     */
     public static Main.Integration integration() {
         return integration;
     }
 
+    /**
+     * Builds a reusable HTTP configuration for external API calls.
+     * <p>
+     * Uses the Bearer token from DefaultConfig.api_token and sets reasonable
+     * timeouts and headers for JSON communication.
+     *
+     * @return a configured HttpConfig instance
+     */
     public static HttpConfig GET() {
         String token = ConfigManager.getConfig(Main.INTEGRATION, DefaultConfig.class).api_token;
         return HttpConfig.config(Duration.ofSeconds(10), 10, false, true, "application/json", "UTF-8", HttpHeaders.AUTHORIZATION_BEARER(token));
     }
 
+    /**
+     * Convenience wrapper around ConfigManager.getConfig bound to the application's integration.
+     *
+     * @param clazz the config class to retrieve
+     * @param <T>   the type of Config
+     * @return the loaded configuration instance for the given class
+     */
     public static <T extends Config> T getConfig(Class<T> clazz) {
         return ConfigManager.getConfig(Main.INTEGRATION, clazz);
     }

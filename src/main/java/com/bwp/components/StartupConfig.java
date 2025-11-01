@@ -10,9 +10,22 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 
 import java.util.concurrent.TimeUnit;
 
+
+/**
+ * Application startup configuration that initializes background services after
+ * the Spring context is ready.
+ * <p>
+ * Responsibilities:
+ * - Initialize the QueueManager tied to the Quipt integration
+ * - Schedule Utils.init after a short delay to register configs and bootstrap data
+ */
 @Configuration
 public class StartupConfig {
 
+    /**
+     * Invoked when the Spring application is fully started. Safely initializes
+     * background components and schedules deferred initialization work.
+     */
     @EventListener(ApplicationReadyEvent.class)
     public void onApplicationReady() {
         try {

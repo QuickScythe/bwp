@@ -14,9 +14,25 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * MVC controller for rendering Thymeleaf pages.
+ * <p>
+ * Routes:
+ * - GET /error  → error page with request attributes
+ * - GET /       → home page
+ * - GET /talent → talent listing page
+ */
 @Controller
 public class PageController {
 
+    /**
+     * Renders the error page using standard servlet error attributes.
+     *
+     * @param request the HTTP request containing error attributes
+     * @param session the current HTTP session
+     * @param model   the view model populated with error details
+     * @return the Thymeleaf template name "error"
+     */
     @GetMapping("/error")
     public String error(HttpServletRequest request, HttpSession session, Model model) {
         model.addAttribute("status", request.getAttribute("javax.servlet.error.status_code"));
@@ -26,11 +42,24 @@ public class PageController {
         return "error";
     }
 
+    /**
+     * Renders the home page.
+     *
+     * @param model the view model
+     * @return the Thymeleaf template name "home"
+     * @throws SQLException reserved for future data access expansions
+     */
     @GetMapping("/")
     public String home(Model model) throws SQLException {
         return "home";
     }
 
+    /**
+     * Renders the talent listing page with a map of full name -> Talent.
+     *
+     * @param model the view model populated with people
+     * @return the Thymeleaf template name "talent"
+     */
     @GetMapping("/talent")
     public String talent(Model model) {
 

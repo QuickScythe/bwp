@@ -13,6 +13,12 @@ import java.io.File;
 import java.io.InputStream;
 import java.net.http.HttpResponse;
 
+/**
+ * Configuration that manages Talent records and associated external resources.
+ * <p>
+ * Persists talents.json and maintains per-actor folders under data/actors/<id>/,
+ * including downloading and saving headshot images from TMDB.
+ */
 @ConfigTemplate(name = "talents", ext = ConfigTemplate.Extension.JSON)
 public class TalentConfig extends Config {
 
@@ -32,6 +38,13 @@ public class TalentConfig extends Config {
         super(file, name, extension, integration);
     }
 
+    /**
+     * Creates and synchronizes a Talent by TMDB person id, persists it, and ensures
+     * the corresponding actor folder and headshot are created/downloaded.
+     *
+     * @param apiId TMDB person id
+     * @return the created and persisted Talent instance
+     */
     public Talent actor(int apiId) {
         Talent talent = new Talent(apiId);
         talent.sync();
@@ -39,6 +52,12 @@ public class TalentConfig extends Config {
         return talent;
     }
 
+    /**
+     * Persists the provided Talent, ensures local filesystem resources exist,
+     * and downloads the latest headshot image from TMDB.
+     *
+     * @param talent the Talent to persist and sync resources for
+     */
     public void actor(Talent talent) {
         ResourceComponent.ResourceHandlerRecord record = ResourceComponent.ExternalFile.ACTORS.getHandlerRecord();
         File file = record.file();

@@ -17,6 +17,17 @@ A Spring Boot web application for managing and displaying talent data, packaged 
 - Logging to both console and rolling file (Tomcat-compatible)
 - WAR packaging for easy deployment to Tomcat
 
+## Documentation
+Comprehensive documentation is available in the docs/ directory:
+- Overview & Architecture: docs/Architecture.md
+- Configuration: docs/Configuration.md
+- Data Model: docs/DataModel.md
+- API: docs/API.md
+- Build & Deploy: docs/BuildAndDeploy.md
+- Operations: docs/Operations.md
+- Security: docs/Security.md
+- Development: docs/Development.md
+
 ## Directory Structure
 ```
 ├── build.gradle           # Gradle build file
