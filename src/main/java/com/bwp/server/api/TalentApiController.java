@@ -78,7 +78,7 @@ public class TalentApiController extends ApiController {
             TalentConfig config = ConfigManager.getConfig(Main.INTEGRATION, TalentConfig.class);
             return config.actor(apiId);
         } catch (Throwable t) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to add talent: " + apiId, t);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to add talent: " + apiId + ". " + t.getMessage(), t);
         }
     }
 }

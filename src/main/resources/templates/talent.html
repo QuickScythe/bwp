@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <title>Beast Within Talent</title>
+    <title>Beast Within | Talent</title>
     <meta name="description" content="">
     <meta name="keywords" content="">
 
@@ -13,8 +13,10 @@
 
 <body class="starter-page-page">
 
-<header id="header" class="header d-flex align-items-center fixed-top">
-    <div th:replace="~{fragments/main :: navbar(page='talents')}"></div>
+<header id="header" class="header d-flex align-items-center sticky-top">
+    <div class="header-container container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
+        <div th:replace="~{fragments/main :: navbar(page='home')}"></div>
+    </div>
 </header>
 
 <main class="main">
@@ -25,7 +27,7 @@
             <div class="container">
                 <div class="row d-flex justify-content-center text-center">
                     <div class="col-lg-8">
-                        <h1 class="heading-title">Starter Page</h1>
+                        <h1 class="heading-title">Talent</h1>
                         <p class="mb-0">
                             This is a starter page!
                         </p>
