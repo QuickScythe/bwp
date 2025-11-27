@@ -54,7 +54,7 @@ bootRun{
 }
 bootWar {
     // Deploying to Tomcat ROOT requires the artifact to be named ROOT.war
-    archiveFileName = "${rootProject.name}-latest.war"
+    archiveFileName = "ROOT.war"
 }
 jar {
     manifest {
