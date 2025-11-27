@@ -16,16 +16,35 @@ import org.json.JSONObject;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 
+/**
+ * Represents a Talent (person) sourced from TheMovieDB and persisted via QuiptMC Config.
+ * <p>
+ * A Talent stores basic profile information and a collection of credits (cast/crew).
+ * The class can construct itself by calling TMDB and can also perform a sync that
+ * loads combined credits. See TalentConfig for persistence and filesystem side-effects
+ * such as headshot downloads.
+ */
 public class Talent extends ConfigObject {
 
     public String first_name;
     public String last_name;
     public String about;
 
+    /**
+     * Default no-arg constructor for frameworks and deserialization.
+     */
     public Talent() {
-
+        
     }
 
+    /**
+     * Constructs a Talent by fetching profile data from TMDB using the given person id.
+     * Populates name and biography fields; does not persist automatically.
+     *
+     * @param apiId TMDB person id
+     * @throws QuiptApiException if the remote API reports a failure
+     * @throws org.json.JSONException if required fields are missing in the response
+     */
     public Talent(int apiId) {
         this.id = String.valueOf(apiId);
         String url = "https://api.themoviedb.org/3/person/" + id;
@@ -57,10 +76,20 @@ public class Talent extends ConfigObject {
 
 ConfigMap<Credit> credits = new ConfigMap<>();
 
+/**
+ * Returns the display name built from first and last name.
+ *
+ * @return full name string
+ */
 public String fullName() {
     return first_name + " " + last_name;
 }
 
+/**
+ * Synchronizes this Talent's credits by calling TMDB's combined_credits API and
+ * updating the credits map. This method is network-bound and may throw runtime
+ * exceptions if the response is malformed.
+ */
 public void sync() {
     String url = "https://api.themoviedb.org/3/person/" + id + "?append_to_response=combined_credits";
 
@@ -123,17 +152,28 @@ public void sync() {
 }
 
 
+/**
+ * Represents a single credit entry (cast or crew) associated with a Talent.
+ */
 public static class Credit extends ConfigObject {
 
+    /** First known air or release date for this credit. */
     String first_credit_air_date;
+    /** Title or name associated with the credit. */
     String name;
+    /** Character (cast) or job (crew) associated with the credit. */
     String character;
+    /** Media type (movie, tv, or unknown). */
     String media_type;
     public double popularity;
     public double vote_average;
     public int vote_count;
     public int episode_count;
 
+    /**
+     * Populates the credit from a TMDB JSON object, applying default values and
+     * normalizing field names to the local schema.
+     */
     @Override
     public void fromJson(JSONObject json) {
 //            System.out.println(json.toString(2));
@@ -168,8 +208,14 @@ public static class Credit extends ConfigObject {
         super.fromJson(json);
     }
 
+    /**
+     * Factory for Credit objects used by the QuiptMC configuration system.
+     */
     public static class Factory implements ConfigObject.Factory<Credit> {
 
+        /**
+         * Returns the binary class name recognized by the config factory registry.
+         */
         @Override
         public String getClassName() {
             return Credit.class.getName();

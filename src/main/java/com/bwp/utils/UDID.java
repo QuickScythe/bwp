@@ -4,7 +4,11 @@ import java.util.Calendar;
 import java.util.Date;
 
 /**
- * Unique Date Identifier
+ * Unique Date Identifier (UDID) generator and parser.
+ * <p>
+ * Produces compact, sortable identifiers composed of a caller-supplied prefix and a
+ * timestamp formatted as yyyyMMddHHmm, with an optional "-N" suffix for disambiguation.
+ * Example for 07/15/2025 18:35 with prefix "CID": CID202507151835 or CID202507151835-1
  */
 public class UDID {
 
@@ -35,14 +39,35 @@ public class UDID {
         }
     }
 
+    /**
+     * Parses a UDID from its textual representation without the prefix, e.g., 202507151835-1.
+     *
+     * @param prefix the identifier prefix to include when rendering back to string
+     * @param date   the timestamp portion formatted as yyyyMMddHHmm with optional -N suffix
+     * @return a UDID instance
+     * @throws IllegalArgumentException if the date or suffix are invalid
+     */
     public static UDID fromString(String prefix, String date) {
         return new UDID(prefix, date);
     }
 
+    /**
+     * Creates a UDID from a millisecond epoch timestamp.
+     *
+     * @param prefix the identifier prefix
+     * @param date   epoch milliseconds
+     * @return a UDID instance representing the specified time
+     */
     public static UDID fromDate(String prefix, long date) {
         return new UDID(prefix, date);
     }
 
+    /**
+     * Convenience factory for a UDID representing the current time.
+     *
+     * @param prefix the identifier prefix
+     * @return a UDID for now
+     */
     public static UDID now(String prefix) {
         return fromDate(prefix, System.currentTimeMillis());
     }
@@ -69,6 +94,9 @@ public class UDID {
         return calendar;
     }
 
+    /**
+     * Renders the UDID in the canonical prefix+yyyyMMddHHmm[-N] format.
+     */
     @Override
     public String toString() {
         Calendar calendar = Calendar.getInstance();
@@ -85,6 +113,9 @@ public class UDID {
         return format;
     }
 
+    /**
+     * Compares UDIDs by their canonical string representation.
+     */
     @Override
     public boolean equals(Object obj) {
         if(obj instanceof UDID udid)
@@ -92,6 +123,9 @@ public class UDID {
         return super.equals(obj);
     }
 
+    /**
+     * Returns the timestamp component as a java.util.Date.
+     */
     public Date date() {
         return new Date(this.date);
     }

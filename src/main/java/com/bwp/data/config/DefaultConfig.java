@@ -7,9 +7,17 @@ import com.quiptmc.core.config.ConfigValue;
 
 import java.io.File;
 
+/**
+ * Root application configuration persisted as config.json.
+ * Currently holds external API settings such as the TMDB api_token.
+ */
 @ConfigTemplate(name="config", ext = ConfigTemplate.Extension.JSON)
 public class DefaultConfig extends Config {
 
+    /**
+     * Bearer token for TheMovieDB API requests. Provide a valid token for
+     * talent synchronization and image downloads.
+     */
     @ConfigValue
     public String api_token = "change this";
 

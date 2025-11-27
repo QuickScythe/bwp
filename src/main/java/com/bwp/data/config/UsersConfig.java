@@ -12,6 +12,11 @@ import java.io.File;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Configuration class that persists application users, their permissions, and API tokens.
+ * <p>
+ * Backed by users.json in the resolved data directory. Uses ConfigMap<User> for storage.
+ */
 @ConfigTemplate(name="users", ext = ConfigTemplate.Extension.JSON)
 public class UsersConfig extends Config {
 
@@ -31,10 +36,24 @@ public class UsersConfig extends Config {
         super(file, name, extension, integration);
     }
 
+    /**
+     * Retrieves a user by id.
+     *
+     * @param id the UUID string of the user
+     * @return the User instance or null if not present
+     */
     public User get(String id){
         return users.get(id);
     }
 
+    /**
+     * Creates and persists a new user with the given username and encrypted password.
+     * Generates a unique UUID and saves the configuration.
+     *
+     * @param username          the username to assign
+     * @param encryptedPassword the already-encrypted/hashed password
+     * @return the newly created User
+     */
     public User create(String username, String encryptedPassword) {
         UUID uuid = UUID.randomUUID();
         while(users.contains(uuid.toString()))
@@ -51,6 +70,13 @@ public class UsersConfig extends Config {
         return user;
     }
 
+    /**
+     * Searches all users for a token with the provided id.
+     * If a matching token is found but is expired, it is removed and empty is returned.
+     *
+     * @param rawToken the presented token id
+     * @return Optional user who owns the valid (non-expired) token
+     */
     public Optional<User> searchByToken(String rawToken) {
         for (User user : users.values()) {
             for (var token : user.tokens.values()) {

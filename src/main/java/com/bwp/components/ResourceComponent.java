@@ -11,9 +11,26 @@ import org.springframework.web.servlet.resource.PathResourceResolver;
 import java.io.File;
 import java.io.IOException;
 
+/**
+ * Spring WebMvc configuration that exposes files under the application's data directory
+ * as static resources, under the /external/{folder}/ path.
+ * <p>
+ * Currently registers a handler for actor headshots and other per-talent assets
+ * in data/actors/, allowing Thymeleaf or clients to reference them via
+ * /external/actors/<file>.
+ */
 @Configuration
 public class ResourceComponent implements WebMvcConfigurer {
 
+    /**
+     * Registers resource handlers for each ExternalFile enum entry. Ensures the backing
+     * directories exist, then maps /external/{folder}/** to the corresponding filesystem path.
+     * <p>
+     * Security: the PathResourceResolver verifies the resolved resource stays within the
+     * configured directory by comparing canonical paths.
+     *
+     * @param registry the Spring ResourceHandlerRegistry to update
+     */
     @Override
     public void addResourceHandlers(@NonNull ResourceHandlerRegistry registry) {
         for(ExternalFile file : ExternalFile.values()) {
@@ -50,7 +67,11 @@ public class ResourceComponent implements WebMvcConfigurer {
 
     }
 
+    /**
+     * Enumeration of external resource folders exposed via /external/{folder}/.
+     */
     public enum ExternalFile {
+        /** Talent/actor-related resources stored under data/actors/. */
         ACTORS(new ResourceHandlerRecord("actors"));
 
         private final ResourceHandlerRecord handlerRecord;
@@ -59,13 +80,28 @@ public class ResourceComponent implements WebMvcConfigurer {
             this.handlerRecord = handlerRecord;
         }
 
+        /**
+         * Metadata describing how to resolve and expose this external folder.
+         *
+         * @return the record holding folder configuration
+         */
         public ResourceHandlerRecord getHandlerRecord() {
             return handlerRecord;
         }
     }
 
+    /**
+     * Immutable descriptor for an externally exposed folder under the data directory.
+     *
+     * @param folder the relative folder name under the data directory (e.g., "actors")
+     */
     public record ResourceHandlerRecord(String folder) {
 
+        /**
+         * Resolves the absolute File location for this folder under the integration's data directory.
+         *
+         * @return absolute File path
+         */
         public File file() {
             return new File(Main.INTEGRATION.dataFolder(), folder).getAbsoluteFile();
         }

@@ -10,7 +10,7 @@ on:
       context_path:
         description: "Tomcat context path (use '/' for ROOT)"
         required: false
-        default: "/bwp-latest"
+        default: "/"
 
 jobs:
   build:
@@ -40,7 +40,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: bwp-war
-          path: build/libs/bwp-latest.war
+          path: build/libs/ROOT.war
 
   deploy:
     name: Deploy to Tomcat
@@ -64,10 +64,10 @@ jobs:
           TOMCAT_URL: ${{ secrets.TOMCAT_URL }}
           TOMCAT_USER: ${{ secrets.TOMCAT_USER }}
           TOMCAT_PASSWORD: ${{ secrets.TOMCAT_PASSWORD }}
-          CONTEXT_PATH: ${{ github.event.inputs.context_path || secrets.CONTEXT_PATH || '/bwp-latest' }}
+          CONTEXT_PATH: ${{ '/' }}
         run: |
           set -e
-          WAR_FILE="dist/bwp-latest.war"
+          WAR_FILE="dist/ROOT.war"
           if [ ! -f "$WAR_FILE" ]; then
             echo "WAR not found at $WAR_FILE" >&2
             exit 1
@@ -79,7 +79,7 @@ jobs:
           fi
 
           # Normalize context path to start with '/'
-          if [ -z "$CONTEXT_PATH" ]; then CONTEXT_PATH="/bwp-latest"; fi
+          if [ -z "$CONTEXT_PATH" ]; then CONTEXT_PATH="/"; fi
           case "$CONTEXT_PATH" in
             /*) ;;
             *) CONTEXT_PATH="/$CONTEXT_PATH" ;;
@@ -128,10 +128,10 @@ jobs:
           TOMCAT_URL: ${{ secrets.TOMCAT_URL }}
           TOMCAT_USER: ${{ secrets.TOMCAT_USER }}
           TOMCAT_PASSWORD: ${{ secrets.TOMCAT_PASSWORD }}
-          CONTEXT_PATH: ${{ '/bwp-dev' }}
+          CONTEXT_PATH: ${{ '/' }}
         run: |
           set -e
-          WAR_FILE="dist/bwp-latest.war"
+          WAR_FILE="dist/ROOT.war"
           if [ ! -f "$WAR_FILE" ]; then
             echo "WAR not found at $WAR_FILE" >&2
             exit 1
@@ -143,7 +143,7 @@ jobs:
           fi
 
           # Normalize context path to start with '/'
-          if [ -z "$CONTEXT_PATH" ]; then CONTEXT_PATH="/bwp-latest"; fi
+          if [ -z "$CONTEXT_PATH" ]; then CONTEXT_PATH="/"; fi
           case "$CONTEXT_PATH" in
             /*) ;;
             *) CONTEXT_PATH="/$CONTEXT_PATH" ;;

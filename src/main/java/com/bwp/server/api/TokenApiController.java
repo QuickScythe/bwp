@@ -19,10 +19,27 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Token management REST API for listing and generating user tokens.
+ *
+ * Base path: /api/token
+ *
+ * Endpoints:
+ * - POST /api/token/list       → List token ids for the authenticated token's owner (READ_SECRETS)
+ * - POST /api/token/generate   → Generate a new token with a set of permissions (WRITE_SECRETS)
+ */
 @RestController
 @RequestMapping("/api/token")
 public class TokenApiController extends ApiController {
 
+    /**
+     * Lists all token ids that belong to the authenticated token's owner.
+     * Requires READ_SECRETS permission on the presented token.
+     *
+     * @param requestRaw JSON body containing {"token":"<id>"}
+     * @return a list of token id strings
+     * @throws ResponseStatusException 403 if the token is invalid or insufficiently privileged
+     */
     @PostMapping("/list")
     public List<String> list(@RequestBody String requestRaw){
         Token token = validateToken(requestRaw, Permissions.READ_SECRETS);
@@ -35,6 +52,20 @@ public class TokenApiController extends ApiController {
         return response;
     }
 
+    /**
+     * Generates a new token for the authenticated user with the requested permissions.
+     * Requires WRITE_SECRETS permission on the presented token.
+     *
+     * Request body JSON shape:
+     * {
+     *   "token": "<presentedTokenId>",
+     *   "permissions": ["PERM_A", "PERM_B", ...]
+     * }
+     *
+     * @param tokenContainer JSON body containing the presented token and desired permissions
+     * @return JSON string containing the newly issued token id: {"token":"<newId>"}
+     * @throws ResponseStatusException 400 for malformed input; 403 if insufficient permission
+     */
     @PostMapping("/generate")
     public String generate(@RequestBody String tokenContainer) {
         Token token = validateToken(tokenContainer, Permissions.WRITE_SECRETS);

@@ -15,10 +15,20 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.OffsetDateTime;
 import java.util.*;
 
+/**
+ * REST API endpoints for health checks and utility operations.
+ * <p>
+ * Base path: /api
+ */
 @RestController
 @RequestMapping("/api")
 public class ApiController {
 
+    /**
+     * Health check endpoint.
+     *
+     * @return a map containing service status and current timestamp
+     */
     @GetMapping("/health")
     public Map<String, Object> health() {
         Map<String, Object> status = new LinkedHashMap<>();
@@ -28,13 +38,26 @@ public class ApiController {
     }
 
 
+    /**
+     * Readiness endpoint at /api.
+     *
+     * @return a short message indicating the API is running
+     */
     @GetMapping()
     public Object root() {
         return "BWP Server API is running.";
     }
 
 
-    public Token validateToken(String tokenContainer, Permission... permissions) {
+    /**
+         * Validates a presented token against stored users and required permissions.
+         *
+         * @param tokenContainer JSON string containing a field "token" with the token id
+         * @param permissions    the required permissions to check
+         * @return the matching Token if valid and authorized
+         * @throws ResponseStatusException 401 if token not found; may throw 400 for invalid input
+         */
+        public Token validateToken(String tokenContainer, Permission... permissions) {
         String tokenId = extractTokenID(tokenContainer);
         UsersConfig usersConfig = ConfigManager.getConfig(Main.INTEGRATION, UsersConfig.class);
         Optional<User> owner = usersConfig.searchByToken(tokenId);
@@ -50,7 +73,15 @@ public class ApiController {
 
 
 
-    private String extractTokenID(String tokenContainer) {
+    /**
+         * Extracts the token id from a JSON container string.
+         * The expected shape is: {"token":"<id>"}
+         *
+         * @param tokenContainer the raw JSON string containing the token field
+         * @return the token id string
+         * @throws ResponseStatusException 400 if format is invalid or token field is missing
+         */
+        private String extractTokenID(String tokenContainer) {
         if (!tokenContainer.trim().startsWith("{") || !tokenContainer.trim().endsWith("}"))
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid talent data format.");
 
