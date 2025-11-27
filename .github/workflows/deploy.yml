@@ -10,7 +10,7 @@ on:
       context_path:
         description: "Tomcat context path (use '/' for ROOT)"
         required: false
-        default: "/bwp-latest"
+        default: "/"
 
 jobs:
   build:
@@ -39,8 +39,8 @@ jobs:
       - name: Upload WAR artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ROOT
-          path: build/libs/bwp-latest.war
+          name: bwp-war
+          path: build/libs/ROOT.war
 
   deploy:
     name: Deploy to Tomcat
@@ -53,7 +53,7 @@ jobs:
       - name: Download WAR artifact
         uses: actions/download-artifact@v4
         with:
-          name: ROOT
+          name: bwp-war
           path: dist
 
       - name: Show downloaded files
@@ -64,7 +64,7 @@ jobs:
           TOMCAT_URL: ${{ secrets.TOMCAT_URL }}
           TOMCAT_USER: ${{ secrets.TOMCAT_USER }}
           TOMCAT_PASSWORD: ${{ secrets.TOMCAT_PASSWORD }}
-          CONTEXT_PATH: ${{ github.event.inputs.context_path || secrets.CONTEXT_PATH || '/' }}
+          CONTEXT_PATH: ${{ '/' }}
         run: |
           set -e
           WAR_FILE="dist/ROOT.war"
@@ -117,7 +117,7 @@ jobs:
       - name: Download WAR artifact
         uses: actions/download-artifact@v4
         with:
-          name: ROOT
+          name: bwp-war
           path: dist
 
       - name: Show downloaded files
