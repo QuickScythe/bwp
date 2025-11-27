@@ -39,7 +39,7 @@ jobs:
       - name: Upload WAR artifact
         uses: actions/upload-artifact@v4
         with:
-          name: bwp-war
+          name: ROOT.war
           path: build/libs/bwp-latest.war
 
   deploy:
@@ -117,7 +117,7 @@ jobs:
       - name: Download WAR artifact
         uses: actions/download-artifact@v4
         with:
-          name: bwp-war
+          name: ROOT.war
           path: dist
 
       - name: Show downloaded files
@@ -128,10 +128,10 @@ jobs:
           TOMCAT_URL: ${{ secrets.TOMCAT_URL }}
           TOMCAT_USER: ${{ secrets.TOMCAT_USER }}
           TOMCAT_PASSWORD: ${{ secrets.TOMCAT_PASSWORD }}
-          CONTEXT_PATH: ${{ '/bwp-dev' }}
+          CONTEXT_PATH: ${{ '/' }}
         run: |
           set -e
-          WAR_FILE="dist/bwp-latest.war"
+          WAR_FILE="dist/ROOT.war"
           if [ ! -f "$WAR_FILE" ]; then
             echo "WAR not found at $WAR_FILE" >&2
             exit 1
@@ -143,7 +143,7 @@ jobs:
           fi
 
           # Normalize context path to start with '/'
-          if [ -z "$CONTEXT_PATH" ]; then CONTEXT_PATH="/bwp-latest"; fi
+          if [ -z "$CONTEXT_PATH" ]; then CONTEXT_PATH="/"; fi
           case "$CONTEXT_PATH" in
             /*) ;;
             *) CONTEXT_PATH="/$CONTEXT_PATH" ;;
